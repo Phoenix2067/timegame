@@ -1,51 +1,40 @@
-package com.rewinder;
+package rewinder;
 
-import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 
 /**
- * Fire obstacle that burns out faster in fast time.
+ * Fire obstacle that fades out with time.
  */
-public class Fire extends GameObject {
-    public double life;
-    public final double maxLife;
+public class Fire {
+    public Rectangle rect;
+    public double life = 400;
     public boolean active = true;
 
-    public Fire(double x, double y, double width, double height, double life) {
-        super(x, y, width, height);
-        this.life = life;
-        this.maxLife = life;
+    public Fire(double x, double y, double width, double height, Pane world) {
+        rect = new Rectangle(x, y, width, height);
+        rect.setFill(Color.ORANGERED);
+        world.getChildren().add(rect);
     }
 
-    public void update(double delta) {
+    public void update(double timeScale) {
         if (!active) return;
 
-        life -= delta;
+        life -= timeScale;
 
         if (life <= 0) {
-            life = 0;
             active = false;
+            life = 0;
+            rect.setOpacity(0.1);
+        } else {
+            rect.setOpacity(life / 400.0);
         }
     }
 
-    @Override
-    public void draw(GraphicsContext graphics) {
-        if (!active) {
-            graphics.setFill(Color.GRAY);
-            graphics.fillText("Burned out", x - 8, y + 30);
-            return;
-        }
-
-        double percent = life / maxLife;
-        double currentHeight = Math.max(8, height * percent);
-
-        graphics.setFill(Color.ORANGERED);
-        graphics.fillOval(x, y + height - currentHeight, width, currentHeight);
-
-        graphics.setFill(Color.YELLOW);
-        graphics.fillOval(x + 12, y + height - currentHeight + 12, width - 24, Math.max(8, currentHeight - 15));
-
-        graphics.setFill(Color.WHITE);
-        graphics.fillText("Fire", x + 15, y - 8);
+    public void restore(double life, boolean active) {
+        this.life = life;
+        this.active = active;
+        rect.setOpacity(active ? life / 400.0 : 0.1);
     }
 }

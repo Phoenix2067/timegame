@@ -1,55 +1,41 @@
-package com.rewinder;
+package rewinder;
 
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.TextAlignment;
+import javafx.scene.control.Label;
+import javafx.scene.layout.Pane;
 
 /**
- * Pause/how-to-play menu overlay.
- *
- * <p>The menu positions itself based on the current window size.</p>
+ * Pause and how-to-play menu.
  */
-public class PauseMenu {
-    public void draw(GraphicsContext graphics, double width, double height, boolean startScreen) {
-        graphics.setFill(Color.rgb(0, 0, 0, 0.82));
-        graphics.fillRect(0, 0, width, height);
+public class PauseMenu extends Pane {
+    private final Label menuText = new Label();
 
-        double centerX = width / 2.0;
-        double top = Math.max(45, height * 0.12);
+    public PauseMenu() {
+        setPrefSize(1000, 600);
+        setStyle("-fx-background-color: rgba(0,0,0,0.82);");
 
-        graphics.setTextAlign(TextAlignment.CENTER);
+        menuText.setText(
+                "REWINDER\n\n" +
+                "HOW TO PLAY\n\n" +
+                "A / D  - Move\n" +
+                "W or SPACE  - Jump\n" +
+                "Q  - Normal time\n" +
+                "SHIFT  - Slow time\n" +
+                "E  - Fast forward time\n" +
+                "Hold R  - Rewind\n" +
+                "1  - Easy level\n" +
+                "2  - Medium level\n" +
+                "3  - Hard level\n" +
+                "4  - Ultra hard level\n" +
+                "P or ESC  - Pause / menu\n" +
+                "ENTER  - Start / resume\n\n" +
+                "Use slow time to dodge bullets, fast time to burn out fires,\n" +
+                "and rewind if you make a mistake."
+        );
 
-        graphics.setFill(Color.WHITE);
-        graphics.setFont(Font.font("Arial", Math.max(26, width * 0.035)));
-        graphics.fillText("REWINDER", centerX, top);
+        menuText.setStyle("-fx-font-size: 23px; -fx-text-fill: white; -fx-font-family: Arial; -fx-padding: 30; -fx-background-color: rgba(20,20,20,0.9); -fx-border-color: white; -fx-border-width: 2;");
+        menuText.setLayoutX(170);
+        menuText.setLayoutY(40);
 
-        graphics.setFont(Font.font("Arial", Math.max(15, width * 0.018)));
-
-        double y = top + 55;
-        double gap = Math.max(24, height * 0.045);
-
-        graphics.fillText("HOW TO PLAY", centerX, y);
-        y += gap * 1.4;
-
-        graphics.fillText("A / D or Arrow Keys  - Move", centerX, y); y += gap;
-        graphics.fillText("W / SPACE / UP       - Jump", centerX, y); y += gap;
-        graphics.fillText("SHIFT                - Slow time", centerX, y); y += gap;
-        graphics.fillText("E                    - Fast time", centerX, y); y += gap;
-        graphics.fillText("Hold R               - Rewind your position and world state", centerX, y); y += gap;
-        graphics.fillText("1 / 2 / 3 / 4         - Switch difficulty levels", centerX, y); y += gap;
-        graphics.fillText("P or ESC             - Pause / resume", centerX, y); y += gap;
-        graphics.fillText("F11                  - Fullscreen toggle", centerX, y); y += gap * 1.5;
-
-        graphics.fillText("Goal: dodge enemies, burn out fire using fast time,", centerX, y); y += gap;
-        graphics.fillText("and use rewind if you make a mistake.", centerX, y); y += gap * 1.7;
-
-        if (startScreen) {
-            graphics.fillText("Press ENTER to start", centerX, Math.min(height - 40, y));
-        } else {
-            graphics.fillText("Press ENTER, P, or ESC to resume", centerX, Math.min(height - 40, y));
-        }
-
-        graphics.setTextAlign(TextAlignment.LEFT);
+        getChildren().add(menuText);
     }
 }

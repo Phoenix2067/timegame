@@ -1,147 +1,107 @@
-package com.rewinder;
+package rewinder;
 
-import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
-import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 
 import java.util.List;
 import java.util.Set;
 
 /**
- * Player character with movement, jumping, collision, and animation state.
+ * Player movement, jump, collision, and animation.
  */
-public class Player extends GameObject {
-    public double vx = 0;
-    public double vy = 0;
-
-    private boolean onGround = false;
+public class Player {
+    private final ImageView view;
     private final PlayerSprites sprites;
+
+    public double velocityY = 0;
+    private boolean canJump = false;
     private int runFrameIndex = 0;
     private int animationCounter = 0;
-    private double facing = 1;
 
-    public Player(double x, double y, PlayerSprites sprites) {
-        super(x, y, 40, 55);
+    public Player(PlayerSprites sprites) {
         this.sprites = sprites;
+        view = new ImageView(sprites.idleFrame);
+        view.setFitWidth(40);
+        view.setFitHeight(55);
+        respawn();
     }
 
-    /**
-     * Updates player movement using normal, unscaled time.
-     *
-     * @param delta seconds since last frame
-     * @param keys current keys
-     * @param platforms platforms
-     */
-    public void update(double delta, Set<KeyCode> keys, List<Platform> platforms) {
-        double speed = 280;
-        double gravity = 1100;
+    public void update(Set<KeyCode> keys, List<Rectangle> platforms, double gravity) {
+        boolean aPressed = keys.contains(KeyCode.A);
+        boolean dPressed = keys.contains(KeyCode.D);
 
-        vx = 0;
+        if (aPressed) view.setX(view.getX() - 5);
+        if (dPressed) view.setX(view.getX() + 5);
 
-        if (keys.contains(KeyCode.A) || keys.contains(KeyCode.LEFT)) {
-            vx = -speed;
-            facing = -1;
+        if ((keys.contains(KeyCode.W) || keys.contains(KeyCode.SPACE)) && canJump) {
+            velocityY = -12;
+            canJump = false;
         }
 
-        if (keys.contains(KeyCode.D) || keys.contains(KeyCode.RIGHT)) {
-            vx = speed;
-            facing = 1;
-        }
+        velocityY += gravity;
+        view.setY(view.getY() + velocityY);
 
-        if ((keys.contains(KeyCode.SPACE) || keys.contains(KeyCode.W) || keys.contains(KeyCode.UP)) && onGround) {
-            vy = -520;
-            onGround = false;
-        }
-
-        vy += gravity * delta;
-
-        x += vx * delta;
-        for (Platform platform : platforms) {
-            if (intersects(platform)) {
-                if (vx > 0) x = platform.x - width;
-                if (vx < 0) x = platform.x + platform.width;
-                vx = 0;
-            }
-        }
-
-        y += vy * delta;
-        onGround = false;
-
-        for (Platform platform : platforms) {
-            if (intersects(platform)) {
-                if (vy > 0) {
-                    y = platform.y - height;
-                    vy = 0;
-                    onGround = true;
-                } else if (vy < 0) {
-                    y = platform.y + platform.height;
-                    vy = 0;
+        canJump = false;
+        for (Rectangle platform : platforms) {
+            if (velocityY > 0 && view.getBoundsInParent().intersects(platform.getBoundsInParent())) {
+                if (view.getY() + view.getFitHeight() < platform.getY() + 15) {
+                    view.setY(platform.getY() - view.getFitHeight());
+                    velocityY = 0;
+                    canJump = true;
                 }
             }
         }
 
-        updateAnimation(keys);
+        updateAnimation(aPressed, dPressed);
     }
 
-    private void updateAnimation(Set<KeyCode> keys) {
-        boolean moving = keys.contains(KeyCode.A) || keys.contains(KeyCode.D) ||
-                keys.contains(KeyCode.LEFT) || keys.contains(KeyCode.RIGHT);
-
-        if (!onGround) {
-            // jump frame
-        } else if (moving) {
+    private void updateAnimation(boolean aPressed, boolean dPressed) {
+        if (!canJump) {
+            view.setImage(sprites.jumpFrame);
+        } else if (aPressed || dPressed) {
             animationCounter++;
             if (animationCounter >= 8) {
                 animationCounter = 0;
                 runFrameIndex++;
-                if (runFrameIndex >= sprites.runFrames.length) {
-                    runFrameIndex = 0;
-                }
+                if (runFrameIndex >= sprites.runFrames.length) runFrameIndex = 0;
+                view.setImage(sprites.runFrames[runFrameIndex]);
             }
         } else {
-            runFrameIndex = 0;
-        }
-    }
-
-    public void respawn(double spawnX, double spawnY) {
-        x = spawnX;
-        y = spawnY;
-        vx = 0;
-        vy = 0;
-    }
-
-    public double getFacing() {
-        return facing;
-    }
-
-    @Override
-    public void draw(GraphicsContext graphics) {
-        boolean hasRealImage = sprites.idle.getWidth() > 1 && sprites.idle.getHeight() > 1;
-
-        if (!hasRealImage) {
-            graphics.setFill(Color.DEEPSKYBLUE);
-            graphics.fillRoundRect(x, y, width, height, 10, 10);
-            graphics.setStroke(Color.WHITE);
-            graphics.strokeRoundRect(x, y, width, height, 10, 10);
-            graphics.setFill(Color.BLACK);
-            graphics.fillOval(x + 22, y + 14, 6, 6);
-            return;
+            view.setImage(sprites.idleFrame);
         }
 
-        if (!onGround) {
-            graphics.drawImage(sprites.jump, x, y, width, height);
-        } else if (Math.abs(vx) > 0) {
-            graphics.save();
-            if (facing < 0) {
-                graphics.translate(x + width, y);
-                graphics.scale(-1, 1);
-                graphics.drawImage(sprites.runFrames[runFrameIndex], 0, 0, width, height);
-            } else {
-                graphics.drawImage(sprites.runFrames[runFrameIndex], x, y, width, height);
-            }
-            graphics.restore();
-        } else {
-            graphics.drawImage(sprites.idle, x, y, width, height);
-        }
+        if (aPressed) view.setScaleX(-1);
+        if (dPressed) view.setScaleX(1);
+    }
+
+    public void respawn() {
+        view.setX(50);
+        view.setY(450);
+        velocityY = 0;
+    }
+
+    public double getX() {
+        return view.getX();
+    }
+
+    public double getY() {
+        return view.getY();
+    }
+
+    public void setX(double x) {
+        view.setX(x);
+    }
+
+    public void setY(double y) {
+        view.setY(y);
+    }
+
+    public ImageView getView() {
+        return view;
+    }
+
+    public boolean fellOutOfWorld() {
+        return view.getY() > 800;
     }
 }

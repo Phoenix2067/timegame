@@ -1,51 +1,55 @@
-package com.rewinder;
+package rewinder;
 
-import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 
 /**
- * Patrol sword enemy.
+ * Sword enemy that patrols between two x positions.
  */
-public class SwordEnemy extends Enemy {
-    private final double patrolLeft;
-    private final double patrolRight;
-    private double direction = 1;
-    private final double speed = 115;
+public class SwordEnemy {
+    public Rectangle body;
+    private Rectangle sword;
 
-    public SwordEnemy(double x, double y, double patrolLeft, double patrolRight) {
-        super(x, y, 45, 55);
+    private double patrolLeft;
+    private double patrolRight;
+    private double direction = 1;
+    private double speed = 1.8;
+
+    public SwordEnemy(double x, double y, double patrolLeft, double patrolRight, Pane world) {
         this.patrolLeft = patrolLeft;
         this.patrolRight = patrolRight;
+
+        body = new Rectangle(x, y, 35, 50);
+        body.setFill(Color.PURPLE);
+
+        sword = new Rectangle(x + 35, y + 20, 30, 5);
+        sword.setFill(Color.LIGHTGRAY);
+
+        world.getChildren().addAll(body, sword);
     }
 
-    @Override
-    public void update(double delta, GameWorld game) {
-        x += speed * direction * delta;
+    public void update(double timeScale) {
+        body.setX(body.getX() + speed * direction * timeScale);
 
-        if (x < patrolLeft) {
-            x = patrolLeft;
+        if (body.getX() < patrolLeft) {
+            body.setX(patrolLeft);
             direction = 1;
         }
 
-        if (x > patrolRight) {
-            x = patrolRight;
+        if (body.getX() > patrolRight) {
+            body.setX(patrolRight);
             direction = -1;
         }
+
+        sword.setX(direction > 0 ? body.getX() + 35 : body.getX() - 30);
+        sword.setY(body.getY() + 20);
     }
 
-    @Override
-    public void draw(GraphicsContext graphics) {
-        graphics.setFill(Color.PURPLE);
-        graphics.fillRoundRect(x, y, width, height, 8, 8);
-        graphics.setFill(Color.LIGHTGRAY);
-
-        if (direction > 0) {
-            graphics.fillRect(x + 36, y + 20, 30, 5);
-        } else {
-            graphics.fillRect(x - 21, y + 20, 30, 5);
-        }
-
-        graphics.setFill(Color.WHITE);
-        graphics.fillText("Sword", x - 2, y - 8);
+    public void restorePosition(double x, double y) {
+        body.setX(x);
+        body.setY(y);
+        sword.setY(y + 20);
+        sword.setX(direction > 0 ? x + 35 : x - 30);
     }
 }

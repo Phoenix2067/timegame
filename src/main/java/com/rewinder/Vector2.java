@@ -1,7 +1,7 @@
-package com.rewinder;
+package rewinder;
 
 /**
- * Simple two-dimensional position.
+ * Basic x/y point.
  */
 public class Vector2 {
     public double x;
