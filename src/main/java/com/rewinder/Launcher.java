@@ -3,10 +3,13 @@ package com.rewinder;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.image.Image;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
@@ -16,7 +19,8 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Main launcher for the split-class version.
+ * Main launcher for the game.
+ * Integrates Launcher look and gameplay with Main's parallax backgrounds.
  */
 public class Launcher extends Application {
     private double timeScale = 1.0;
@@ -24,6 +28,7 @@ public class Launcher extends Application {
     private boolean isPaused = false;
     private boolean showMenu = true;
     private final double GRAVITY = 0.6;
+    private boolean isGameFinished = false;
 
     private int currentLevel = 1;
     private String currentLevelName = "Training Facility";
@@ -45,15 +50,44 @@ public class Launcher extends Application {
     private final Label uiLabel = new Label();
     private final PauseMenu pauseMenu = new PauseMenu();
 
+    private Canvas canvas;
+    private GraphicsContext graphics;
+    private final Image[] bgImages = new Image[4];
+
     @Override
     public void start(Stage primaryStage) {
         Pane root = new Pane();
+        root.setStyle("-fx-background-color: transparent;");
 
-        uiLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: white; -fx-background-color: rgba(0,0,0,0.7); -fx-padding: 10;");
+        AssetLoader loader = new AssetLoader();
+        bgImages[0] = loader.loadImageOrPlaceholder("/assets/background.png");
+        bgImages[1] = loader.loadImageOrPlaceholder("/assets/background1.png");
+        bgImages[2] = loader.loadImageOrPlaceholder("/assets/background2.png");
+        bgImages[3] = loader.loadImageOrPlaceholder("/assets/background3.png");
+
+        // 1. Background Canvas
+        canvas = new Canvas(1000, 600);
+        graphics = canvas.getGraphicsContext2D();
+
+        // Canvas dynamically resizes with root
+        canvas.widthProperty().bind(root.widthProperty());
+        canvas.heightProperty().bind(root.heightProperty());
+
+        // 2. Gameplay World
+        gameWorld.setStyle("-fx-background-color: transparent;");
+
+        // 3. HUD and Pause UI
+        uiLabel.setStyle(
+                "-fx-font-size: 16px; -fx-text-fill: white; -fx-background-color: rgba(0,0,0,0.7); -fx-padding: 10;");
         pauseMenu.setVisible(true);
         isPaused = true;
 
-        root.getChildren().addAll(gameWorld, uiLabel, pauseMenu);
+        // Bind PauseMenu dimensions to root for responsiveness
+        pauseMenu.prefWidthProperty().bind(root.widthProperty());
+        pauseMenu.prefHeightProperty().bind(root.heightProperty());
+
+        // Add to root (Canvas behind gameWorld, overlays on top)
+        root.getChildren().addAll(canvas, gameWorld, uiLabel, pauseMenu);
 
         Scene scene = new Scene(root, 1000, 600, Color.BLACK);
 
@@ -61,6 +95,14 @@ public class Launcher extends Application {
 
         scene.setOnKeyPressed(event -> {
             keys.add(event.getCode());
+
+            if (isGameFinished) {
+                if (event.getCode() == KeyCode.DIGIT1) {
+                    loadLevel(1);
+                    isPaused = false;
+                }
+                return;
+            }
 
             if (event.getCode() == KeyCode.ESCAPE || event.getCode() == KeyCode.P) {
                 togglePauseMenu();
@@ -76,38 +118,59 @@ public class Launcher extends Application {
                 return;
             }
 
-            if (isPaused) return;
+            if (isPaused)
+                return;
 
-            if (event.getCode() == KeyCode.Q) timeScale = 1.0;
-            if (event.getCode() == KeyCode.SHIFT) timeScale = 0.2;
-            if (event.getCode() == KeyCode.E) timeScale = 8.0;
-            if (event.getCode() == KeyCode.R) isRewinding = true;
+            if (event.getCode() == KeyCode.Q)
+                timeScale = 1.0;
+            if (event.getCode() == KeyCode.SHIFT)
+                timeScale = 0.2;
+            if (event.getCode() == KeyCode.E)
+                timeScale = 8.0;
+            if (event.getCode() == KeyCode.R)
+                isRewinding = true;
 
-            if (event.getCode() == KeyCode.DIGIT1) loadLevel(1);
-            if (event.getCode() == KeyCode.DIGIT2) loadLevel(2);
-            if (event.getCode() == KeyCode.DIGIT3) loadLevel(3);
-            if (event.getCode() == KeyCode.DIGIT4) loadLevel(4);
+            if (event.getCode() == KeyCode.DIGIT1)
+                loadLevel(1);
+            if (event.getCode() == KeyCode.DIGIT2)
+                loadLevel(2);
+            if (event.getCode() == KeyCode.DIGIT3)
+                loadLevel(3);
+            if (event.getCode() == KeyCode.DIGIT4)
+                loadLevel(4);
+
+            if (event.getCode() == KeyCode.F11) {
+                primaryStage.setFullScreen(!primaryStage.isFullScreen());
+            }
         });
 
         scene.setOnKeyReleased(event -> {
             keys.remove(event.getCode());
-            if (event.getCode() == KeyCode.R) isRewinding = false;
+            if (event.getCode() == KeyCode.R)
+                isRewinding = false;
         });
 
         new AnimationTimer() {
             @Override
             public void handle(long now) {
+                drawBackground(canvas.getWidth(), canvas.getHeight());
+
                 if (isPaused || showMenu) {
                     updateUI();
                     return;
                 }
 
-                if (isRewinding) performRewind();
-                else update();
+                if (isRewinding)
+                    performRewind();
+                else
+                    update();
             }
         }.start();
 
-        primaryStage.setTitle("Rewinder - Split Old Launcher With New Levels");
+        primaryStage.setTitle("Rewinder - Time Control Side Scroller");
+        primaryStage.setMinWidth(640);
+        primaryStage.setMinHeight(400);
+        primaryStage.setResizable(true);
         primaryStage.setScene(scene);
         primaryStage.show();
     }
@@ -120,6 +183,7 @@ public class Launcher extends Application {
 
     private void loadLevel(int levelNumber) {
         clearLevel();
+        isGameFinished = false;
 
         currentLevel = levelNumber;
 
@@ -155,7 +219,8 @@ public class Launcher extends Application {
         checkExitDoor();
         recordState();
 
-        if (player.fellOutOfWorld()) die();
+        if (player.fellOutOfWorld())
+            die();
 
         updateUI();
     }
@@ -204,9 +269,13 @@ public class Launcher extends Application {
 
     private void checkExitDoor() {
         if (exitDoor != null && player.getView().getBoundsInParent().intersects(exitDoor.getBoundsInParent())) {
-            int next = currentLevel + 1;
-            if (next > 4) next = 1;
-            loadLevel(next);
+            if (currentLevel == 4) {
+                isGameFinished = true;
+                isPaused = true;
+            } else {
+                int next = currentLevel + 1;
+                loadLevel(next);
+            }
         }
     }
 
@@ -277,15 +346,62 @@ public class Launcher extends Application {
     }
 
     private void updateUI() {
+        if (isGameFinished) {
+            uiLabel.setText("Congratulations you finished the game! To Continue the game click 1");
+            return;
+        }
+
         if (showMenu || isPaused) {
             uiLabel.setText("PAUSED | ENTER: Resume | P/ESC: Toggle Menu");
             return;
         }
 
-        String mode = timeScale == 0.2 ? "SLOW" : (timeScale == 8.0 ? "SKIP" : "NORMAL");
+        String mode = timeScale == 0.2 ? "SLOW" : (timeScale == 1.5 ? "FAST" : "NORMAL");
         uiLabel.setText("LEVEL " + currentLevel + ": " + currentLevelName +
                 " | MODE: " + mode +
-                " | Q:Norm SHIFT:Slow E:Skip | R:Rewind | 1-4:Levels | P:Pause");
+                " | Q:Normal SHIFT:Slow E:Double the Speed | R:Rewind | 1-4:Levels | P:Pause");
+    }
+
+    private void drawBackground(double screenWidth, double screenHeight) {
+        if (screenWidth <= 0 || screenHeight <= 0) {
+            return;
+        }
+
+        // Draw a base dark background in case the image is still loading or doesn't
+        // cover everything
+        graphics.setFill(Color.rgb(20, 20, 25));
+        graphics.fillRect(0, 0, screenWidth, screenHeight);
+
+        double cameraX = player != null ? player.getX() - 300 : 0;
+        double levelWidth = exitDoor != null ? exitDoor.getX() + exitDoor.getWidth() + 200 : 3000;
+
+        Image bgImage = null;
+        if (currentLevel >= 1 && currentLevel <= 4) {
+            bgImage = bgImages[currentLevel - 1];
+        }
+
+        if (bgImage != null && !bgImage.isError()) {
+            double bgWidth = bgImage.getWidth();
+            if (bgWidth <= 0)
+                bgWidth = 1000;
+
+            // Tile the background image from 0 to levelWidth
+            for (double x = 0; x < levelWidth; x += bgWidth) {
+                graphics.drawImage(bgImage, x - cameraX, 0, bgWidth, screenHeight);
+            }
+        }
+
+        // Apply a translucent overlay based on the current time mode
+        if (timeScale == 0.2) {
+            graphics.setFill(Color.rgb(20, 40, 80, 0.45)); // Blue tint for SLOW
+            graphics.fillRect(0, 0, screenWidth, screenHeight);
+        } else if (timeScale == 8.0) {
+            graphics.setFill(Color.rgb(80, 40, 20, 0.45)); // Orange tint for FAST
+            graphics.fillRect(0, 0, screenWidth, screenHeight);
+        } else {
+            graphics.setFill(Color.rgb(30, 30, 40, 0.15)); // Soft slate tint for NORMAL
+            graphics.fillRect(0, 0, screenWidth, screenHeight);
+        }
     }
 
     public static void main(String[] args) {

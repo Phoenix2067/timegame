@@ -26,7 +26,7 @@ public class GameCamera {
      * @param screenWidth current canvas/window width
      */
     public void follow(Player player, double worldWidth, double screenWidth) {
-        x = player.x - screenWidth * 0.32;
+        x = player.getX() - screenWidth * 0.32;
 
         if (x < 0) x = 0;
         if (x > worldWidth - screenWidth) x = worldWidth - screenWidth;
