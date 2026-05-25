@@ -1,4 +1,4 @@
-package rewinder;
+package com.rewinder;
 
 /**
  * Basic x/y point.

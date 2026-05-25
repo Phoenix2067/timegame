@@ -1,4 +1,4 @@
-package rewinder;
+package com.rewinder;
 
 import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;

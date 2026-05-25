@@ -1,4 +1,4 @@
-package rewinder;
+package com.rewinder;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package rewinder;
+package com.rewinder;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;

@@ -1,4 +1,4 @@
-package rewinder;
+package com.rewinder;
 
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;

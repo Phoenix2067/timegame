@@ -1,4 +1,4 @@
-package rewinder;
+package com.rewinder;
 
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;

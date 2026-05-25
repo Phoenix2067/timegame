@@ -1,4 +1,4 @@
-package rewinder;
+package com.rewinder;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.WritableImage;
