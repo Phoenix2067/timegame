@@ -211,14 +211,4 @@ public class Player extends GameObject {
         return view.getBoundsInParent().intersects(enemy.x, enemy.y, enemy.width, enemy.height);
     }
 
-    /**
-     * Checks whether the player intersects the exit door.
-     *
-     * @param door the door to test collision against
-     * @return true if the player intersects the door
-     */
-    public boolean intersects(Door door) {
-        return view.getBoundsInParent().intersects(door.x, door.y, door.width, door.height);
-    }
-
 }
