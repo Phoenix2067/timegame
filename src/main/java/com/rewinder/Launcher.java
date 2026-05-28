@@ -40,6 +40,7 @@ public class Launcher extends Application {
     private final Set<KeyCode> keys = new HashSet<>();
     private Rectangle exitDoor;
     private final Pane gameWorld = new Pane();
+    private final Rectangle tintRect = new Rectangle(1000, 600);
     private ImageView backgroundView;
     private final Image[] bgImages = new Image[4];
     private final Label uiLabel = new Label();
@@ -65,7 +66,10 @@ public class Launcher extends Application {
         backgroundView.setFitWidth(1000);
         backgroundView.setFitHeight(600);
 
-        root.getChildren().addAll(backgroundView, gameWorld, pauseMenu);
+        tintRect.setFill(Color.TRANSPARENT);
+        tintRect.setMouseTransparent(true);
+
+        root.getChildren().addAll(backgroundView, gameWorld, tintRect, pauseMenu);
 
         Scene scene = new Scene(root, 1000, 600, Color.BLACK);
 
@@ -107,6 +111,8 @@ public class Launcher extends Application {
                 timeScale = 8.0;
             if (event.getCode() == KeyCode.R)
                 isRewinding = true;
+
+            updateTint();
 
             if (event.getCode() == KeyCode.DIGIT1)
                 loadLevel(1);
@@ -354,18 +360,21 @@ public class Launcher extends Application {
     private void updateUI() {
         if (isGameFinished) {
             uiLabel.setText("Congratulations you finished the game! To Continue the game click 1");
+            updateTint();
             return;
         }
 
         if (showMenu || isPaused) {
             uiLabel.setText("PAUSED | ENTER: Resume | P/ESC: Toggle Menu");
+            updateTint();
             return;
         }
 
-        String mode = timeScale == 0.2 ? "SLOW" : (timeScale == 1.5 ? "FAST" : "NORMAL");
+        String mode = timeScale == 0.2 ? "SLOW" : (timeScale == 8.0 ? "FAST" : "NORMAL");
         uiLabel.setText("LEVEL " + currentLevel + ": " + currentLevelName +
                 " | MODE: " + mode +
                 " | Q:Normal SHIFT:Slow E:Double the Speed | R:Rewind | 1-4:Levels | P:Pause");
+        updateTint();
     }
 
     /**
@@ -373,6 +382,21 @@ public class Launcher extends Application {
      *
      * @param args application command-line arguments
      */
+    private void updateTint() {
+        if (showMenu || isPaused) {
+            tintRect.setFill(Color.TRANSPARENT);
+            return;
+        }
+
+        if (timeScale == 0.2) {
+            tintRect.setFill(Color.rgb(173, 216, 230, 0.25)); 
+        } else if (timeScale == 8.0) {
+            tintRect.setFill(Color.rgb(255, 200, 150, 0.25)); 
+        } else {
+            tintRect.setFill(Color.TRANSPARENT);
+        }
+    }
+
     public static void main(String[] args) {
         launch(args);
     }
