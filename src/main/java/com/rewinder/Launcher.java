@@ -4,7 +4,6 @@ import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
@@ -58,27 +57,10 @@ public class Launcher extends Application {
         bgImages[3] = loader.loadImageOrPlaceholder("/assets/background3.png");
 
         backgroundView = new ImageView();
-        backgroundView.setPreserveRatio(false);
-        backgroundView.fitWidthProperty().bind(root.widthProperty());
-        backgroundView.fitHeightProperty().bind(root.heightProperty());
-        backgroundView.setSmooth(true);
+        backgroundView.setFitWidth(1000);
+        backgroundView.setFitHeight(600);
 
-        // 1. Background image view
-        // 2. Gameplay World
-        gameWorld.setStyle("-fx-background-color: transparent;");
-
-        // 3. HUD and Pause UI
-        uiLabel.setStyle(
-                "-fx-font-size: 16px; -fx-text-fill: white; -fx-background-color: rgba(0,0,0,0.7); -fx-padding: 10;");
-        pauseMenu.setVisible(true);
-        isPaused = true;
-
-        // Bind PauseMenu dimensions to root for responsiveness
-        pauseMenu.prefWidthProperty().bind(root.widthProperty());
-        pauseMenu.prefHeightProperty().bind(root.heightProperty());
-
-        // Add to root (background first, then gameplay world, then overlays)
-        root.getChildren().addAll(backgroundView, gameWorld, uiLabel, pauseMenu);
+        root.getChildren().addAll(backgroundView, gameWorld, pauseMenu);
 
         Scene scene = new Scene(root, 1000, 600, Color.BLACK);
 
@@ -153,9 +135,7 @@ public class Launcher extends Application {
         }.start();
 
         primaryStage.setTitle("Rewinder - Time Control Side Scroller");
-        primaryStage.setMinWidth(640);
-        primaryStage.setMinHeight(400);
-        primaryStage.setResizable(true);
+        primaryStage.setResizable(false);
         primaryStage.setScene(scene);
         primaryStage.show();
     }
@@ -172,7 +152,7 @@ public class Launcher extends Application {
 
         currentLevel = levelNumber;
 
-        if (backgroundView != null && currentLevel >= 1 && currentLevel <= bgImages.length) {
+        if (currentLevel >= 1 && currentLevel <= bgImages.length) {
             backgroundView.setImage(bgImages[currentLevel - 1]);
         }
 
