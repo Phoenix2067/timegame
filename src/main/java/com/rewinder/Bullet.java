@@ -5,7 +5,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 /**
- * Bullet projectile.
+ * A bullet fired by the player. Moves in a straight line towards the target point.
  */
 public class Bullet {
     public Rectangle rect;

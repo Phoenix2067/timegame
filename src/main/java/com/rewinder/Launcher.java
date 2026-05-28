@@ -4,6 +4,8 @@ import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -38,6 +40,8 @@ public class Launcher extends Application {
     private final Set<KeyCode> keys = new HashSet<>();
     private Rectangle exitDoor;
     private final Pane gameWorld = new Pane();
+    private ImageView backgroundView;
+    private final Image[] bgImages = new Image[4];
     private final Label uiLabel = new Label();
     private final PauseMenu pauseMenu = new PauseMenu();
 
@@ -45,10 +49,21 @@ public class Launcher extends Application {
     @Override
     public void start(Stage primaryStage) {
         Pane root = new Pane();
-        root.setStyle("-fx-background-color: transparent;");
+        root.setStyle("-fx-background-color: black;");
 
-        // 1. Gameplay World is rendered as Pane children
+        AssetLoader loader = new AssetLoader();
+        bgImages[0] = loader.loadImageOrPlaceholder("/assets/background.png");
+        bgImages[1] = loader.loadImageOrPlaceholder("/assets/background1.png");
+        bgImages[2] = loader.loadImageOrPlaceholder("/assets/background2.png");
+        bgImages[3] = loader.loadImageOrPlaceholder("/assets/background3.png");
 
+        backgroundView = new ImageView();
+        backgroundView.setPreserveRatio(false);
+        backgroundView.fitWidthProperty().bind(root.widthProperty());
+        backgroundView.fitHeightProperty().bind(root.heightProperty());
+        backgroundView.setSmooth(true);
+
+        // 1. Background image view
         // 2. Gameplay World
         gameWorld.setStyle("-fx-background-color: transparent;");
 
@@ -62,8 +77,8 @@ public class Launcher extends Application {
         pauseMenu.prefWidthProperty().bind(root.widthProperty());
         pauseMenu.prefHeightProperty().bind(root.heightProperty());
 
-        // Add to root (gameWorld first, overlays on top)
-        root.getChildren().addAll(gameWorld, uiLabel, pauseMenu);
+        // Add to root (background first, then gameplay world, then overlays)
+        root.getChildren().addAll(backgroundView, gameWorld, uiLabel, pauseMenu);
 
         Scene scene = new Scene(root, 1000, 600, Color.BLACK);
 
@@ -114,10 +129,6 @@ public class Launcher extends Application {
                 loadLevel(3);
             if (event.getCode() == KeyCode.DIGIT4)
                 loadLevel(4);
-
-            if (event.getCode() == KeyCode.F11) {
-                primaryStage.setFullScreen(!primaryStage.isFullScreen());
-            }
         });
 
         scene.setOnKeyReleased(event -> {
@@ -160,6 +171,10 @@ public class Launcher extends Application {
         isGameFinished = false;
 
         currentLevel = levelNumber;
+
+        if (backgroundView != null && currentLevel >= 1 && currentLevel <= bgImages.length) {
+            backgroundView.setImage(bgImages[currentLevel - 1]);
+        }
 
         AssetLoader loader = new AssetLoader();
         player = new Player(loader.loadPlayerSprites());

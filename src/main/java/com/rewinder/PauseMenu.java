@@ -2,9 +2,6 @@ package com.rewinder;
 
 import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.TextAlignment;
 
 /**
  * Pause and how-to-play menu.

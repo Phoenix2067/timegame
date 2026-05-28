@@ -6,7 +6,7 @@ import javafx.scene.image.WritableImage;
 import java.io.InputStream;
 
 /**
- * Loads image assets safely.
+ * Loads images like the player.
  */
 public class AssetLoader {
     public Image loadImageOrPlaceholder(String path) {

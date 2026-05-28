@@ -1,7 +1,5 @@
 package com.rewinder;
 
-import javafx.scene.paint.Color;
-
 /**
  * Exit door.
  */
