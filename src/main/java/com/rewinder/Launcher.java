@@ -4,6 +4,7 @@ import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
@@ -44,7 +45,11 @@ public class Launcher extends Application {
     private final Label uiLabel = new Label();
     private final PauseMenu pauseMenu = new PauseMenu();
 
-    
+    /**
+     * Sets up and starts the JavaFX game window.
+     *
+     * @param primaryStage the main application stage
+     */
     @Override
     public void start(Stage primaryStage) {
         Pane root = new Pane();
@@ -140,19 +145,27 @@ public class Launcher extends Application {
         primaryStage.show();
     }
 
+    /**
+     * Toggles the pause menu and paused game state.
+     */
     private void togglePauseMenu() {
         showMenu = !showMenu;
         isPaused = showMenu;
         pauseMenu.setVisible(showMenu);
     }
 
+    /**
+     * Loads the specified game level and initializes its entities.
+     *
+     * @param levelNumber the level number to load
+     */
     private void loadLevel(int levelNumber) {
         clearLevel();
         isGameFinished = false;
 
         currentLevel = levelNumber;
 
-        if (currentLevel >= 1 && currentLevel <= bgImages.length) {
+        if (backgroundView != null && currentLevel >= 1 && currentLevel <= bgImages.length) {
             backgroundView.setImage(bgImages[currentLevel - 1]);
         }
 
@@ -165,6 +178,9 @@ public class Launcher extends Application {
         currentLevelName = builder.getLevelName();
     }
 
+    /**
+     * Clears the current level state and resets game variables.
+     */
     private void clearLevel() {
         gameWorld.getChildren().clear();
 
@@ -180,6 +196,9 @@ public class Launcher extends Application {
         keys.clear();
     }
 
+    /**
+     * Updates game objects, performs collisions, and records rewind state.
+     */
     private void update() {
         player.update(keys, platforms, GRAVITY);
         gameWorld.setLayoutX(300 - player.getX());
@@ -194,6 +213,9 @@ public class Launcher extends Application {
         updateUI();
     }
 
+    /**
+     * Updates all hazard entities and handles player collisions.
+     */
     private void updateHazards() {
         for (Fire fire : fires) {
             fire.update(timeScale);
@@ -236,6 +258,9 @@ public class Launcher extends Application {
         }
     }
 
+    /**
+     * Checks whether the player has reached the exit door.
+     */
     private void checkExitDoor() {
         if (exitDoor != null && player.getView().getBoundsInParent().intersects(exitDoor.getBoundsInParent())) {
             if (currentLevel == 4) {
@@ -248,6 +273,9 @@ public class Launcher extends Application {
         }
     }
 
+    /**
+     * Records a snapshot of the current world state for rewinding.
+     */
     private void recordState() {
         WorldState state = new WorldState(player.getX(), player.getY(), player.velocityY);
 
@@ -271,6 +299,9 @@ public class Launcher extends Application {
         }
     }
 
+    /**
+     * Restores the previous state while rewinding time.
+     */
     private void performRewind() {
         if (history.isEmpty()) {
             isRewinding = false;
@@ -309,11 +340,17 @@ public class Launcher extends Application {
         uiLabel.setText("!!! REWINDING !!!");
     }
 
+    /**
+     * Resets the player after death and stops rewinding.
+     */
     private void die() {
         player.respawn();
         isRewinding = false;
     }
 
+    /**
+     * Updates the status label text for the current game state.
+     */
     private void updateUI() {
         if (isGameFinished) {
             uiLabel.setText("Congratulations you finished the game! To Continue the game click 1");
@@ -331,6 +368,11 @@ public class Launcher extends Application {
                 " | Q:Normal SHIFT:Slow E:Double the Speed | R:Rewind | 1-4:Levels | P:Pause");
     }
 
+    /**
+     * Launches the JavaFX application.
+     *
+     * @param args application command-line arguments
+     */
     public static void main(String[] args) {
         launch(args);
     }

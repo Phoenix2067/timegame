@@ -8,22 +8,37 @@ import javafx.scene.shape.Rectangle;
  * Fire obstacle that fades out with time.
  */
 public class Fire extends GameObject {
-    public Rectangle rect; 
+    public Rectangle rect;
     public double life;
     public double burnTime;
     public boolean active = true;
 
+    /**
+     * Creates a fire obstacle and adds it to the given world.
+     *
+     * @param x      the x coordinate of the fire
+     * @param y      the y coordinate of the fire
+     * @param width  the width of the fire hitbox
+     * @param height the height of the fire hitbox
+     * @param world  the Pane to add the fire rectangle to
+     */
     public Fire(double x, double y, double width, double height, Pane world) {
         super(x, y, width, height);
-        this.burnTime = 800; 
+        this.burnTime = 800;
         this.life = 800;
         rect = new Rectangle(x, y, width, height);
         rect.setFill(Color.ORANGERED);
         world.getChildren().add(rect);
     }
 
-     public void update(double timeScale) {
-        if (!active) return;
+    /**
+     * Updates the fire lifetime and opacity.
+     *
+     * @param timeScale the current time scaling factor
+     */
+    public void update(double timeScale) {
+        if (!active)
+            return;
 
         life -= timeScale;
 
@@ -36,6 +51,12 @@ public class Fire extends GameObject {
         }
     }
 
+    /**
+     * Restores the fire state from a rewind snapshot.
+     *
+     * @param life   the saved life value
+     * @param active whether the fire is active
+     */
     public void restore(double life, boolean active) {
         this.life = life;
         this.active = active;

@@ -19,7 +19,17 @@ public class LevelBuilder {
     private Rectangle exitDoor;
     private String levelName = "Training Facility";
 
-    public LevelBuilder(Pane world, List<Rectangle> platforms, List<Fire> fires, List<Sniper> snipers, List<SwordEnemy> swordEnemies) {
+    /**
+     * Constructs a LevelBuilder for the given world and entity lists.
+     *
+     * @param world       the Pane used for level rendering
+     * @param platforms   the list to store platforms
+     * @param fires       the list to store fire obstacles
+     * @param snipers     the list to store sniper enemies
+     * @param swordEnemies the list to store sword enemies
+     */
+    public LevelBuilder(Pane world, List<Rectangle> platforms, List<Fire> fires, List<Sniper> snipers,
+            List<SwordEnemy> swordEnemies) {
         this.world = world;
         this.platforms = platforms;
         this.fires = fires;
@@ -27,15 +37,30 @@ public class LevelBuilder {
         this.swordEnemies = swordEnemies;
     }
 
+    /**
+     * Builds a level by number and returns the exit door.
+     *
+     * @param levelNumber the number of the level to build
+     * @return the exit door for the created level
+     */
     public Rectangle buildLevel(int levelNumber) {
-        if (levelNumber == 1) createEasyLevel();
-        else if (levelNumber == 2) createMediumLevel();
-        else if (levelNumber == 3) createHardLevel();
-        else createUltraHardLevel();
+        if (levelNumber == 1)
+            createEasyLevel();
+        else if (levelNumber == 2)
+            createMediumLevel();
+        else if (levelNumber == 3)
+            createHardLevel();
+        else
+            createUltraHardLevel();
 
         return exitDoor;
     }
 
+    /**
+     * Returns the current level name.
+     *
+     * @return the built level's name
+     */
     public String getLevelName() {
         return levelName;
     }
@@ -105,7 +130,8 @@ public class LevelBuilder {
         swordEnemies.add(new SwordEnemy(5000, 500, 4750, 5250, world));
         swordEnemies.add(new SwordEnemy(6100, 500, 5900, 6400, world));
 
-        for (int i = 0; i < 10; i++) fires.add(new Fire(1500 + i * 420, 450, 70, 100, world));
+        for (int i = 0; i < 10; i++)
+            fires.add(new Fire(1500 + i * 420, 450, 70, 100, world));
 
         addCheckpoint(2200, 490);
         addCheckpoint(4200, 490);
@@ -123,14 +149,16 @@ public class LevelBuilder {
             addPlatform(x, y, 170, 20);
         }
 
-        for (int i = 0; i < 10; i++) snipers.add(new Sniper(800 + i * 1050, 500, world));
+        for (int i = 0; i < 10; i++)
+            snipers.add(new Sniper(800 + i * 1050, 500, world));
 
         for (int i = 0; i < 10; i++) {
             double start = 1000 + i * 950;
             swordEnemies.add(new SwordEnemy(start, 500, start - 200, start + 350, world));
         }
 
-        for (int i = 0; i < 15; i++) fires.add(new Fire(1400 + i * 650, 450, 75, 100, world));
+        for (int i = 0; i < 15; i++)
+            fires.add(new Fire(1400 + i * 650, 450, 75, 100, world));
 
         addCheckpoint(2000, 490);
         addCheckpoint(4000, 490);

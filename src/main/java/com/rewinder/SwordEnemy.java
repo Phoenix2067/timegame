@@ -16,7 +16,15 @@ public class SwordEnemy extends Enemy {
     private double direction = 1;
     private double speed = 1.8;
 
-    // Pane-based constructor
+    /**
+     * Creates a sword enemy that patrols horizontally.
+     *
+     * @param x          the starting x coordinate
+     * @param y          the starting y coordinate
+     * @param patrolLeft the left patrol limit
+     * @param patrolRight the right patrol limit
+     * @param world      the Pane to add the enemy and sword to
+     */
     public SwordEnemy(double x, double y, double patrolLeft, double patrolRight, Pane world) {
         super(x, y, 35, 50);
         this.patrolLeft = patrolLeft;
@@ -31,6 +39,11 @@ public class SwordEnemy extends Enemy {
         world.getChildren().addAll(body, sword);
     }
 
+    /**
+     * Updates patrol movement and positions the node shapes.
+     *
+     * @param timeScale the current time scaling factor
+     */
     public void update(double timeScale) {
         // This is called from the Pane-based Launcher
         updatePatrol(timeScale);
@@ -58,6 +71,12 @@ public class SwordEnemy extends Enemy {
         }
     }
 
+    /**
+     * Restores the enemy position after rewinding.
+     *
+     * @param x the restored x coordinate
+     * @param y the restored y coordinate
+     */
     public void restorePosition(double x, double y) {
         this.x = x;
         this.y = y;
