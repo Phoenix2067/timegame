@@ -1,7 +1,5 @@
 package com.rewinder;
 
-import javafx.scene.canvas.GraphicsContext;
-
 /**
  * Base class for rectangular game objects.
  */
@@ -25,5 +23,4 @@ public abstract class GameObject {
                 y + height > other.y;
     }
 
-    public abstract void draw(GraphicsContext graphics);
 }

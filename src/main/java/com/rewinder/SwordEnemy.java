@@ -1,13 +1,11 @@
 package com.rewinder;
 
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 /**
  * Sword enemy that patrols between two x positions.
- * Supports both Pane-based Launcher and Canvas-based Main game systems.
  */
 public class SwordEnemy extends Enemy {
     public Rectangle body; // For Pane-based launcher
@@ -17,13 +15,6 @@ public class SwordEnemy extends Enemy {
     private final double patrolRight;
     private double direction = 1;
     private double speed = 1.8;
-
-    // Canvas-based constructor
-    public SwordEnemy(double x, double y, double patrolLeft, double patrolRight) {
-        super(x, y, 35, 50);
-        this.patrolLeft = patrolLeft;
-        this.patrolRight = patrolRight;
-    }
 
     // Pane-based constructor
     public SwordEnemy(double x, double y, double patrolLeft, double patrolRight, Pane world) {
@@ -80,28 +71,4 @@ public class SwordEnemy extends Enemy {
         }
     }
 
-    @Override
-    public void draw(GraphicsContext graphics) {
-        // Draw Purple body
-        graphics.setFill(Color.PURPLE);
-        graphics.fillRect(x, y, width, height);
-
-        // Draw glowing face/eyes for rich details
-        graphics.setFill(Color.RED);
-        if (direction > 0) {
-            graphics.fillRect(x + 20, y + 10, 5, 5);
-            graphics.fillRect(x + 28, y + 10, 5, 5);
-        } else {
-            graphics.fillRect(x + 5, y + 10, 5, 5);
-            graphics.fillRect(x + 13, y + 10, 5, 5);
-        }
-
-        // Draw light gray sword pointing in direction
-        graphics.setFill(Color.LIGHTGRAY);
-        if (direction > 0) {
-            graphics.fillRect(x + width, y + 20, 30, 5);
-        } else {
-            graphics.fillRect(x - 30, y + 20, 30, 5);
-        }
-    }
 }

@@ -3,13 +3,10 @@ package com.rewinder;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.image.Image;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
@@ -20,58 +17,37 @@ import java.util.Set;
 
 /**
  * Main launcher for the game.
- * Integrates Launcher look and gameplay with Main's parallax backgrounds.
  */
 public class Launcher extends Application {
+    private final List<Rectangle> platforms = new ArrayList<>();
+    private final List<Bullet> bullets = new ArrayList<>();
+    private final List<Fire> fires = new ArrayList<>();
+    private final List<Sniper> snipers = new ArrayList<>();
+    private final List<SwordEnemy> swordEnemies = new ArrayList<>();
     private double timeScale = 1.0;
     private boolean isRewinding = false;
     private boolean isPaused = false;
     private boolean showMenu = true;
     private final double GRAVITY = 0.6;
     private boolean isGameFinished = false;
-
     private int currentLevel = 1;
     private String currentLevelName = "Training Facility";
-
     private final List<WorldState> history = new ArrayList<>();
     private final int MAX_HISTORY = 600;
-
     private Player player;
     private final Set<KeyCode> keys = new HashSet<>();
-
-    private final List<Rectangle> platforms = new ArrayList<>();
-    private final List<Bullet> bullets = new ArrayList<>();
-    private final List<Fire> fires = new ArrayList<>();
-    private final List<Sniper> snipers = new ArrayList<>();
-    private final List<SwordEnemy> swordEnemies = new ArrayList<>();
     private Rectangle exitDoor;
-
     private final Pane gameWorld = new Pane();
     private final Label uiLabel = new Label();
     private final PauseMenu pauseMenu = new PauseMenu();
 
-    private Canvas canvas;
-    private GraphicsContext graphics;
-    private final Image[] bgImages = new Image[4];
-
+    
     @Override
     public void start(Stage primaryStage) {
         Pane root = new Pane();
         root.setStyle("-fx-background-color: transparent;");
 
-        AssetLoader loader = new AssetLoader();
-        bgImages[0] = loader.loadImageOrPlaceholder("/assets/background.png");
-        bgImages[1] = loader.loadImageOrPlaceholder("/assets/background1.png");
-        bgImages[2] = loader.loadImageOrPlaceholder("/assets/background2.png");
-        bgImages[3] = loader.loadImageOrPlaceholder("/assets/background3.png");
-
-        // 1. Background Canvas
-        canvas = new Canvas(1000, 600);
-        graphics = canvas.getGraphicsContext2D();
-
-        // Canvas dynamically resizes with root
-        canvas.widthProperty().bind(root.widthProperty());
-        canvas.heightProperty().bind(root.heightProperty());
+        // 1. Gameplay World is rendered as Pane children
 
         // 2. Gameplay World
         gameWorld.setStyle("-fx-background-color: transparent;");
@@ -86,8 +62,8 @@ public class Launcher extends Application {
         pauseMenu.prefWidthProperty().bind(root.widthProperty());
         pauseMenu.prefHeightProperty().bind(root.heightProperty());
 
-        // Add to root (Canvas behind gameWorld, overlays on top)
-        root.getChildren().addAll(canvas, gameWorld, uiLabel, pauseMenu);
+        // Add to root (gameWorld first, overlays on top)
+        root.getChildren().addAll(gameWorld, uiLabel, pauseMenu);
 
         Scene scene = new Scene(root, 1000, 600, Color.BLACK);
 
@@ -153,8 +129,6 @@ public class Launcher extends Application {
         new AnimationTimer() {
             @Override
             public void handle(long now) {
-                drawBackground(canvas.getWidth(), canvas.getHeight());
-
                 if (isPaused || showMenu) {
                     updateUI();
                     return;
@@ -360,48 +334,6 @@ public class Launcher extends Application {
         uiLabel.setText("LEVEL " + currentLevel + ": " + currentLevelName +
                 " | MODE: " + mode +
                 " | Q:Normal SHIFT:Slow E:Double the Speed | R:Rewind | 1-4:Levels | P:Pause");
-    }
-
-    private void drawBackground(double screenWidth, double screenHeight) {
-        if (screenWidth <= 0 || screenHeight <= 0) {
-            return;
-        }
-
-        // Draw a base dark background in case the image is still loading or doesn't
-        // cover everything
-        graphics.setFill(Color.rgb(20, 20, 25));
-        graphics.fillRect(0, 0, screenWidth, screenHeight);
-
-        double cameraX = player != null ? player.getX() - 300 : 0;
-        double levelWidth = exitDoor != null ? exitDoor.getX() + exitDoor.getWidth() + 200 : 3000;
-
-        Image bgImage = null;
-        if (currentLevel >= 1 && currentLevel <= 4) {
-            bgImage = bgImages[currentLevel - 1];
-        }
-
-        if (bgImage != null && !bgImage.isError()) {
-            double bgWidth = bgImage.getWidth();
-            if (bgWidth <= 0)
-                bgWidth = 1000;
-
-            // Tile the background image from 0 to levelWidth
-            for (double x = 0; x < levelWidth; x += bgWidth) {
-                graphics.drawImage(bgImage, x - cameraX, 0, bgWidth, screenHeight);
-            }
-        }
-
-        // Apply a translucent overlay based on the current time mode
-        if (timeScale == 0.2) {
-            graphics.setFill(Color.rgb(20, 40, 80, 0.45)); // Blue tint for SLOW
-            graphics.fillRect(0, 0, screenWidth, screenHeight);
-        } else if (timeScale == 8.0) {
-            graphics.setFill(Color.rgb(80, 40, 20, 0.45)); // Orange tint for FAST
-            graphics.fillRect(0, 0, screenWidth, screenHeight);
-        } else {
-            graphics.setFill(Color.rgb(30, 30, 40, 0.15)); // Soft slate tint for NORMAL
-            graphics.fillRect(0, 0, screenWidth, screenHeight);
-        }
     }
 
     public static void main(String[] args) {
