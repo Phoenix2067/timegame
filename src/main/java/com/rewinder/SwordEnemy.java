@@ -40,12 +40,6 @@ public class SwordEnemy extends Enemy {
         world.getChildren().addAll(body, sword);
     }
 
-    @Override
-    public void update(double delta, GameWorld game) {
-        // This is called from the canvas GameWorld
-        updatePatrol(delta * 60);
-    }
-
     public void update(double timeScale) {
         // This is called from the Pane-based Launcher
         updatePatrol(timeScale);

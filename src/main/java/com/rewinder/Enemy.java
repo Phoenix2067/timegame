@@ -10,8 +10,6 @@ public abstract class Enemy extends GameObject {
         super(x, y, width, height);
     }
 
-    public abstract void update(double delta, GameWorld game);
-
     @Override
     public abstract void draw(GraphicsContext graphics);
 }

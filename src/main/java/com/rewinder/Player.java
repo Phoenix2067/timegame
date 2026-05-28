@@ -207,10 +207,6 @@ public class Player extends GameObject {
         return view.getBoundsInParent().intersects(fire.rect.getBoundsInParent());
     }
 
-    public boolean intersects(Laser laser) {
-        return view.getBoundsInParent().intersects(laser.x, laser.y, laser.width, laser.height);
-    }
-
     public boolean intersects(Enemy enemy) {
         return view.getBoundsInParent().intersects(enemy.x, enemy.y, enemy.width, enemy.height);
     }

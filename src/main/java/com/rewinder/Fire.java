@@ -25,8 +25,8 @@ public class Fire extends GameObject {
     // Pane-based constructor
     public Fire(double x, double y, double width, double height, Pane world) {
         super(x, y, width, height);
-        this.burnTime = 400; // Original default burnTime/life
-        this.life = 400;
+        this.burnTime = 800; // Original default burnTime/life
+        this.life = 800;
         rect = new Rectangle(x, y, width, height);
         rect.setFill(Color.ORANGERED);
         world.getChildren().add(rect);
